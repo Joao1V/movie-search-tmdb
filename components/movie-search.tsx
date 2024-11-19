@@ -112,7 +112,7 @@ export function MovieSearch() {
               animate={{opacity: 1, y: 0}}
               exit={{opacity: 0, y: -20}}
               transition={{duration: 0.2}}
-              className={"container mx-auto"}
+              className={"container mx-auto pb-10"}
           >
             {movies?.length > 0 && <div className={"mb-4"}><span>{movies.length} resultados</span></div>}
             <MovieTable movies={movies} genres={genres}/>
