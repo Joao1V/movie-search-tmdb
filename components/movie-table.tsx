@@ -27,13 +27,26 @@ import {getStorage, setStorage} from "@/utils/storage";
 
 moment.locale("pt-br");
 
+interface Genre {
+  id: number;
+  name: string;
+}
+
 interface Movie {
+  origin_country?: string[];
+  genres: Genre[];
   id: number;
   title: string;
   poster_path: string;
   genre_ids: number[];
   release_date: string;
   overview: string;
+}
+
+interface Country {
+  english_name:string;
+  iso_3166_1: string;
+  native_name: string;
 }
 
 export interface MovieStorage {
@@ -43,17 +56,16 @@ export interface MovieStorage {
   isDubbed: boolean;
 }
 
-
-
 interface MovieTableProps {
   movies: Movie[];
   genres: { [key: number]: string };
+  countries: Country[];
 }
 
-const TMDB_IMG_URL = "https://image.tmdb.org/t/p/w500";
+const TMDB_IMG_URL = "https://image.tmdb.org/t/p/w300";
 export const STORAGE_MOVIES_DONE = "movies_1"
 
-export function MovieTable({ movies, genres }: MovieTableProps) {
+export function MovieTable({ movies, genres, countries }: MovieTableProps) {
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [checkedMovies, setCheckedMovies] = useState<{ [key: number]: boolean }>(
     {}
@@ -180,18 +192,34 @@ export function MovieTable({ movies, genres }: MovieTableProps) {
                           : "/placeholder.png"
                       }
                       alt={movie.title}
-                      className="h-24 w-16 object-cover rounded"
+                      className="h-32 w-24 object-cover rounded"
                     />
-                    <span className="font-medium" style={{maxWidth:200}}>{movie.title}</span>
+                    <div>
+                      <p className="font-medium text-lg max-w-[200px] mb-4">{movie.title}</p>
+                      <p className="max-w-[300px] line-clamp-4 mb-4">{movie.overview}</p>
+                    </div>
                   </div>
+                  {movie.origin_country &&
+                      <div>{movie.origin_country.map((item, index) => (
+                          <div key={index} className={"mt-4"}>
+                            <span className="font-bold">Origem: </span>
+                            <span>{countries.find(country => country.iso_3166_1 === item)?.english_name || item}</span>
+                          </div>
+                      ))}</div>
+                  }
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-wrap gap-1" style={{maxWidth:300}}>
-                    {getGenres(movie.genre_ids).map((genre, index) => (
-                      <Badge key={index} variant="secondary">
-                        {genre}
-                      </Badge>
+                    {movie.genre_ids ? getGenres(movie.genre_ids).map((genre, index) => (
+                        <Badge key={index} variant="secondary">
+                          {genre}
+                        </Badge>
+                    )) : movie.genres.map((item) => (
+                        <Badge key={item.id} variant="secondary">
+                          {item.name}
+                        </Badge>
                     ))}
+
                   </div>
                 </TableCell>
                 <TableCell>
@@ -236,7 +264,7 @@ export function MovieTable({ movies, genres }: MovieTableProps) {
               />
             )}
             <div className="flex flex-wrap gap-2">
-              {selectedMovie?.genre_ids.map((genreId) => (
+              {selectedMovie?.genre_ids?.map((genreId) => (
                 <Badge key={genreId} variant="outline">
                   {genres[genreId]}
                 </Badge>

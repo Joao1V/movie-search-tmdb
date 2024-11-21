@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {useState, useEffect, useRef} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import moment from "moment-timezone";
@@ -11,16 +11,19 @@ import { Button } from "@/components/ui/button";
 import { MovieTable } from "@/components/movie-table";
 import { MovieDashboard } from "@/components/movie-dashboard";
 import { toast } from "sonner";
+import {Switch} from "@/components/ui/switch";
 
 const TMDB_API_KEY = "84bef04731b60d2f1bd0f851679b2ec5";
 const TMDB_API_URL = "https://api.themoviedb.org/3";
 
 export function MovieSearch() {
-  const [query, setQuery] = useState("");
   const [movies, setMovies] = useState([]);
   const [genres, setGenres] = useState({});
+  const [countries, setCountries] = useState([]);
   const [loading, setLoading] = useState(false);
   const { theme, setTheme } = useTheme();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const fetchGenres = async () => {
     try {
@@ -40,19 +43,24 @@ export function MovieSearch() {
   };
 
   const searchMovies = async () => {
+    const query = inputRef.current?.value || "";
+    const isNumeric = /^\d+$/.test(query);
+
     if (!query.trim()) {
-      toast.error("Por favor, digite um termo para busca");
+      toast.error("Por favor, digite um termo para busca ou forneça um ID");
       return;
     }
 
     setLoading(true);
     try {
-      const response = await axios.get(
-        `${TMDB_API_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(
-          query
-        )}&language=pt-BR`
-      );
-      setMovies(response.data.results);
+      const params = {
+        language: "pt-BR",
+        api_key: TMDB_API_KEY
+      }
+      const response = isNumeric
+          ? await axios.get(`${TMDB_API_URL}/movie/${query}`, {params})
+          : await axios.get(`${TMDB_API_URL}/search/movie`, {params: {...params, query: encodeURIComponent(query)}});
+      setMovies(isNumeric ? [response.data] : response.data.results);
     } catch (error) {
       toast.error("Erro ao buscar filmes");
       console.error("Erro ao buscar filmes:", error);
@@ -60,8 +68,37 @@ export function MovieSearch() {
     setLoading(false);
   };
 
+  const handlePaste = (event: ClipboardEvent) => {
+    const text = event.clipboardData?.getData("text");
+    if (!text) return;
+
+    if (inputRef.current) {
+      inputRef.current.value = text;
+      buttonRef.current?.focus();
+    }
+  };
+  const fetchCountries = async () => {
+    try {
+      const params = {
+        language: "pt-BR",
+        api_key: TMDB_API_KEY
+      }
+      const response = await axios.get(`${TMDB_API_URL}/configuration/countries`, {params});
+      setCountries(response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar países:", error);
+      throw error;
+    }
+  };
+
   useEffect(() => {
     fetchGenres();
+    fetchCountries();
+    document.addEventListener("paste", handlePaste);
+    return () => {
+      document.removeEventListener("paste", handlePaste);
+    };
   }, []);
   return (
       <div className="space-y-8">
@@ -88,15 +125,13 @@ export function MovieSearch() {
         <div className={"sticky top-0 bg-card z-10"}>
           <div className={"container mx-auto py-6"}>
             <MovieDashboard/>
-
             <div className="flex gap-4 mt-5">
               <Input
-                  placeholder="Buscar filmes..."
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Digite o nome ou ID do filme"
+                  ref={inputRef}
                   onKeyPress={(e) => e.key === "Enter" && searchMovies()}
               />
-              <Button onClick={searchMovies} disabled={loading}>
+              <Button onClick={() => searchMovies()} ref={buttonRef} disabled={loading}>
                 <Search className="mr-2 h-4 w-4"/>
                 Buscar
               </Button>
@@ -115,7 +150,7 @@ export function MovieSearch() {
               className={"container mx-auto pb-10"}
           >
             {movies?.length > 0 && <div className={"mb-4"}><span>{movies.length} resultados</span></div>}
-            <MovieTable movies={movies} genres={genres}/>
+            <MovieTable movies={movies} countries={countries} genres={genres}/>
           </motion.div>
         </AnimatePresence>
       </div>
