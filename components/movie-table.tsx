@@ -219,15 +219,15 @@ export function MovieTable({ movies, genres, countries }: MovieTableProps) {
                   </div>
                   {movie.origin_country &&
                       <div className={"mt-4 flex items-center"}>
-                        <span className="font-bold">Origem: </span>
+                        <span className="font-bold mr-3">Origem: </span>
                         {" "}
-                        <div className={'flex gap-1 mr-3'}>
+                        <div className={'flex gap-1 mr-3 '}>
                           {movie.origin_country.map((item, index) => {
                             const country = countries.find(country => country.iso_3166_1 === item);
                             return (
                               <div key={index}>
                                 {country?.iso_3166_1 === 'BR' ? (
-                                  <Badge variant="outline">
+                                  <Badge variant="success">
                                     <span>{country.english_name || item}</span>
                                   </Badge>
                                 ) : (
