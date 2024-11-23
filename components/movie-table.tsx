@@ -13,8 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Info, Check } from "lucide-react";
+import { Info } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +23,7 @@ import {
 import moment from "moment-timezone";
 import "moment/locale/pt-br";
 import {getStorage, setStorage} from "@/utils/storage";
+import Image from "next/image";
 
 moment.locale("pt-br");
 
@@ -62,7 +62,7 @@ interface MovieTableProps {
   countries: Country[];
 }
 
-const TMDB_IMG_URL = "https://image.tmdb.org/t/p/w300";
+const TMDB_IMG_URL = "https://image.tmdb.org/t/p/w185";
 export const STORAGE_MOVIES_DONE = "movies_1"
 
 export function MovieTable({ movies, genres, countries }: MovieTableProps) {
@@ -121,7 +121,6 @@ export function MovieTable({ movies, genres, countries }: MovieTableProps) {
     } else {
       delete newCheckedMovies[movie.id];
     }
-    console.log(newCheckedMovies)
     setCheckedMovies({...newCheckedMovies});
   };
 
@@ -143,6 +142,22 @@ export function MovieTable({ movies, genres, countries }: MovieTableProps) {
   const getGenres = (genreIds: number[]) => {
     return genreIds.map((id) => genres[id]).filter(Boolean);
   };
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if ((event.ctrlKey || event.metaKey) && event.key === "s") {
+      event.preventDefault();
+      if (movies.length > 0) {
+        handleMovieCheck(movies[0], true);
+      }
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [movies]);
 
   useEffect(() => {
     loadCheckedMovies();
@@ -170,6 +185,7 @@ export function MovieTable({ movies, genres, countries }: MovieTableProps) {
                     <div className="relative">
                       <Checkbox
                         checked={checkedMovies[movie.id] || false}
+                        id={`${movie.id}`}
                         onCheckedChange={(checked) =>
                           handleMovieCheck(movie, checked as boolean)
                         }
@@ -200,12 +216,26 @@ export function MovieTable({ movies, genres, countries }: MovieTableProps) {
                     </div>
                   </div>
                   {movie.origin_country &&
-                      <div>{movie.origin_country.map((item, index) => (
-                          <div key={index} className={"mt-4"}>
-                            <span className="font-bold">Origem: </span>
-                            <span>{countries.find(country => country.iso_3166_1 === item)?.english_name || item}</span>
-                          </div>
-                      ))}</div>
+                      <div className={"mt-4 flex items-center"}>
+                        <span className="font-bold">Origem: </span>
+                        {" "}
+                        <div className={'flex gap-1 mr-3'}>
+                          {movie.origin_country.map((item, index) => {
+                            const country = countries.find(country => country.iso_3166_1 === item);
+                            return (
+                              <div key={index}>
+                                {country?.iso_3166_1 === 'BR' ? (
+                                  <Badge variant="outline">
+                                    <span>{country.english_name || item}</span>
+                                  </Badge>
+                                ) : (
+                                  <span>{country?.english_name || item} ;</span>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
                   }
                 </TableCell>
                 <TableCell>
@@ -257,9 +287,10 @@ export function MovieTable({ movies, genres, countries }: MovieTableProps) {
           </DialogHeader>
           <div className="grid gap-4">
             {selectedMovie?.poster_path && (
-              <img
+              <Image
                 src={`${TMDB_IMG_URL}${selectedMovie.poster_path}`}
                 alt={selectedMovie.title}
+                width={200}
                 className="w-[200px] mx-auto rounded-lg"
               />
             )}

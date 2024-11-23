@@ -3,15 +3,14 @@
 import {useState, useEffect, useRef} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
-import moment from "moment-timezone";
 import { useTheme } from "next-themes";
-import { Search, Sun, Moon, Film } from "lucide-react";
+import { Search, Sun, Moon, Film, Save } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MovieTable } from "@/components/movie-table";
 import { MovieDashboard } from "@/components/movie-dashboard";
 import { toast } from "sonner";
-import {Switch} from "@/components/ui/switch";
+import {getStorage} from "@/utils/storage";
 
 const TMDB_API_KEY = "84bef04731b60d2f1bd0f851679b2ec5";
 const TMDB_API_URL = "https://api.themoviedb.org/3";
@@ -92,6 +91,15 @@ export function MovieSearch() {
     }
   };
 
+  const handleCopyToClipboard = (text: any) => {
+    navigator.clipboard.writeText(text).then(() => {
+      toast.success("Texto copiado para a área de transferência!");
+    }).catch((error) => {
+      console.error("Erro ao copiar texto:", error);
+      toast.error("Erro ao copiar texto");
+    });
+  };
+
   useEffect(() => {
     fetchGenres();
     fetchCountries();
@@ -109,14 +117,30 @@ export function MovieSearch() {
                 <Film className="h-8 w-8"/>
                 <h1 className="text-3xl font-bold">Busca de Filmes</h1>
               </div>
-              <Button
+              <div className={"flex items-center"}>
+                <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              >
-                <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"/>
-                <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"/>
-              </Button>
+                >
+                  <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"/>
+                  <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"/>
+                </Button>
+
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      const storageValue = getStorage("movies_1");
+
+                      handleCopyToClipboard(JSON.stringify(storageValue));
+                    }}
+                >
+                  <Save className="h-5 w-5"/>
+                </Button>
+
+              </div>
+
             </div>
           </div>
         </div>

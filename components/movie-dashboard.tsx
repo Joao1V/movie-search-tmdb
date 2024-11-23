@@ -33,7 +33,6 @@ export function MovieDashboard() {
     const now = moment().tz("America/Sao_Paulo");
 
     const format =  "DD/MM/YYYY HH:mm:ss";
-    console.log( movies);
 
     const today = movies.filter((movie) =>
         moment(movie.updated_at, format).isSame(now, "day")
