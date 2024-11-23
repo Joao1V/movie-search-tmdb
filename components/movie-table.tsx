@@ -143,7 +143,9 @@ export function MovieTable({ movies, genres, countries }: MovieTableProps) {
     return genreIds.map((id) => genres[id]).filter(Boolean);
   };
   const handleKeyDown = (event: KeyboardEvent) => {
-    if ((event.ctrlKey || event.metaKey) && event.key === "s") {
+    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+
+    if ((isMac && event.metaKey && event.key === 's') || (!isMac && event.ctrlKey && event.key === 's')) {
       event.preventDefault();
       if (movies.length > 0) {
         handleMovieCheck(movies[0], true);
