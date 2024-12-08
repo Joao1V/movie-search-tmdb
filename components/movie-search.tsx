@@ -11,6 +11,10 @@ import { MovieTable } from "@/components/movie-table";
 import { MovieDashboard } from "@/components/movie-dashboard";
 import { toast } from "sonner";
 import {getStorage} from "@/utils/storage";
+import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
+import Image from "next/image";
+import {Badge} from "@/components/ui/badge";
+import moment from "moment-timezone";
 
 const TMDB_API_KEY = "84bef04731b60d2f1bd0f851679b2ec5";
 const TMDB_API_URL = "https://api.themoviedb.org/3";
@@ -20,6 +24,7 @@ export function MovieSearch() {
   const [genres, setGenres] = useState({});
   const [countries, setCountries] = useState([]);
   const [loading, setLoading] = useState(false);
+  // const [isEditStorage, setIsEditStorage] = useState(false);
   const { theme, setTheme } = useTheme();
   const inputRef = useRef<HTMLInputElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -137,7 +142,31 @@ export function MovieSearch() {
                     }}
                 >
                   <Save className="h-5 w-5"/>
-                </Button>
+                </Button >
+
+                {/*<Button variant="ghost"*/}
+                {/*        size="icon"*/}
+                {/*        onClick={() => {*/}
+                {/*          setIsEditStorage(true)*/}
+                {/*        }}*/}
+                {/*>*/}
+                {/*  ADD*/}
+                {/*</Button>*/}
+                {/*<Dialog open={isEditStorage} onOpenChange={() => setIsEditStorage(false)}>*/}
+                {/*  <DialogContent>*/}
+                {/*    <DialogHeader>*/}
+                {/*      <DialogTitle>Teste</DialogTitle>*/}
+                {/*    </DialogHeader>*/}
+                {/*    <div className="grid gap-4">*/}
+                {/*      <textarea*/}
+                {/*          name="storage"*/}
+                {/*          rows={10}*/}
+                {/*          id="storageTextarea"*/}
+                {/*          defaultValue={JSON.stringify(getStorage("movies_1"), null, 2)}*/}
+                {/*      />*/}
+                {/*    </div>*/}
+                {/*  </DialogContent>*/}
+                {/*</Dialog>*/}
 
               </div>
 

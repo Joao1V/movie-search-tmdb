@@ -17,6 +17,8 @@ interface MovieStats {
   yesterday: number;
   week: number;
   month: number;
+  lastMonth: number;
+  total: number;
 }
 
 export function MovieDashboard() {
@@ -25,6 +27,8 @@ export function MovieDashboard() {
     yesterday: 0,
     week: 0,
     month: 0,
+    lastMonth: 0,
+    total: 0,
   });
 
   const movies: (MovieStorage | null)[] = getStorage(STORAGE_MOVIES_DONE);
@@ -48,10 +52,15 @@ export function MovieDashboard() {
     ).length;
 
     const month = movies.filter((movie) =>
-        moment(movie.updated_at, format).isAfter(now.clone().subtract(1, "month"))
+        moment(movie.updated_at, format).isSame(now, "month")
     ).length;
 
-    setStats({ today, yesterday, week, month });
+    const lastMonth = movies.filter((movie) =>
+        moment(movie.updated_at, format).isSame(now.clone().subtract(1, "month"), "month")
+    ).length;
+
+    const total = movies.length
+    setStats({ today, yesterday, week, month, lastMonth, total });
   };
 
 
@@ -60,7 +69,6 @@ export function MovieDashboard() {
     if (movies) {
       const validMovies: MovieStorage[] = movies.filter((movie): movie is MovieStorage => movie !== null);
       calculateStats(validMovies);
-
 
       const handleLocalStorageChange = () => {
         const updatedMovies: MovieStorage[] = getStorage(STORAGE_MOVIES_DONE).filter(
@@ -88,15 +96,15 @@ export function MovieDashboard() {
   }, []);
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <motion.div
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-6">
+        <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0 }}
       >
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Hoje</CardTitle>
+            <CardTitle className="text-sm font-medium">Hoje<small>- {moment().format('DD/MM/YYYY')}</small></CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.today}</div>
@@ -111,7 +119,7 @@ export function MovieDashboard() {
       >
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Ontem</CardTitle>
+            <CardTitle className="text-sm font-medium">Ontem <small>- {moment().subtract(1, 'day').format('DD/MM/YYYY')}</small></CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.yesterday}</div>
@@ -145,6 +153,36 @@ export function MovieDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.month}</div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+      >
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Mês Passado</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.lastMonth}</div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+      >
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.total}</div>
           </CardContent>
         </Card>
       </motion.div>
