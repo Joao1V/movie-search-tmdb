@@ -70,25 +70,20 @@ export function MovieTable({ movies, genres, countries }: MovieTableProps) {
   const [checkedMovies, setCheckedMovies] = useState<{ [key: number]: boolean }>(
     {}
   );
-  const [dubbedStatus, setDubbedStatus] = useState<{ [key: number]: boolean }>(
-    {}
-  );
 
+  const [teste, setTeste] = useState<MovieStorage[]>([]);
   const loadCheckedMovies = () => {
     const newCheckedMovies: { [key: number]: boolean } = {};
-    const newDubbedStatus: { [key: number]: boolean } = {};
 
     const cachedMovies: Array<Movie | null> = getStorage(STORAGE_MOVIES_DONE);
 
     if (cachedMovies && cachedMovies?.length > 0) {
       cachedMovies.forEach((item: any) => {
-        newCheckedMovies[item.id] = true;
-        newDubbedStatus[item.id] = item.isDubbed;
+        if (item.isDubbed) newCheckedMovies[item.id] = true;
       })
     }
 
     setCheckedMovies(newCheckedMovies);
-    setDubbedStatus(newDubbedStatus);
   };
 
 
@@ -101,13 +96,22 @@ export function MovieTable({ movies, genres, countries }: MovieTableProps) {
       id: movie.id,
       title: movie.title,
       updated_at: moment().tz("America/Sao_Paulo").format("DD/MM/YYYY HH:mm:ss"),
-      isDubbed: dubbedStatus[movie.id] || false,
+      isDubbed: true,
     };
 
     if (cachedMoviesDone && cachedMoviesDone?.length > 0) {
-      const index = cachedMoviesDone.findIndex((item: any) => item.id === movieData.id);
+      const index = cachedMoviesDone.findIndex((item: any) => item.id === movie.id);
+      const filtered = cachedMoviesDone.filter((item:any) => item.id === movie.id);
+
       if (index !== -1) {
-        cachedMoviesDone.splice(index, 1);
+        const tr = cachedMoviesDone.findIndex((item: any) => item.id === movie.id && item.isDubbed);
+        if (filtered.length === 2)  {
+          cachedMoviesDone.splice(tr, 1);
+        } else if (cachedMoviesDone[index].isDubbed === false) {
+          cachedMoviesDone.unshift(movieData);
+        } else {
+          cachedMoviesDone.splice(index, 1);
+        }
       } else {
         cachedMoviesDone.unshift(movieData);
       }
@@ -120,23 +124,43 @@ export function MovieTable({ movies, genres, countries }: MovieTableProps) {
       newCheckedMovies[movie.id] = true;
     } else {
       delete newCheckedMovies[movie.id];
+      const index = cachedMoviesDone.findIndex((item: any) => item.id === movie.id);
+      if (index !== -1) {
+        cachedMoviesDone.splice(index, 1);
+      }
     }
-    setCheckedMovies({...newCheckedMovies});
+    setCheckedMovies({ ...newCheckedMovies });
   };
-
   const handleDubbedChange = (movieId: number, isDubbed: boolean) => {
     const cachedMoviesDone: Array<MovieStorage> = getStorage(STORAGE_MOVIES_DONE);
-    const newDubbedStatus = { ...dubbedStatus };
-    newDubbedStatus[movieId] = isDubbed;
-    setDubbedStatus(newDubbedStatus);
 
-    if (checkedMovies[movieId]) {
-      const index = cachedMoviesDone.findIndex((item) => item.id === movieId);
-      if (index !== -1) {
-        cachedMoviesDone[index].isDubbed = isDubbed;
+
+    const filtered = cachedMoviesDone.filter((item) => item.id === movieId);
+
+    if (filtered.length === 0) {
+        cachedMoviesDone.unshift({
+            id: movieId,
+            title: movies.find((movie) => movie.id === movieId)?.title || "",
+            updated_at: moment().tz("America/Sao_Paulo").format("DD/MM/YYYY HH:mm:ss"),
+            isDubbed: false,
+        });
+    } else {
+      const movieIndex = cachedMoviesDone.findIndex((item) => item.id === movieId && !item.isDubbed);
+      if (movieIndex !== -1 && !cachedMoviesDone[movieIndex].isDubbed) {
+        cachedMoviesDone.splice(movieIndex, 1);
+      } else {
+        cachedMoviesDone.unshift({
+          id: movieId,
+          title: movies.find((movie) => movie.id === movieId)?.title || "",
+          updated_at: moment().tz("America/Sao_Paulo").format("DD/MM/YYYY HH:mm:ss"),
+          isDubbed: false,
+        });
       }
-      setStorage(STORAGE_MOVIES_DONE, cachedMoviesDone);
     }
+
+
+    setTeste(() => cachedMoviesDone);
+    setStorage(STORAGE_MOVIES_DONE, cachedMoviesDone);
   };
 
   const getGenres = (genreIds: number[]) => {
@@ -154,6 +178,8 @@ export function MovieTable({ movies, genres, countries }: MovieTableProps) {
   };
 
   useEffect(() => {
+    const cachedMoviesDone = getStorage(STORAGE_MOVIES_DONE);
+    setTeste(cachedMoviesDone)
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
@@ -266,7 +292,7 @@ export function MovieTable({ movies, genres, countries }: MovieTableProps) {
                 {/*    }*/}
                 {/*  />*/}
                 {/*</TableCell>*/}
-                <TableCell>
+                <TableCell className={'flex-col text-center flex-center  columns-1'}>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -274,6 +300,15 @@ export function MovieTable({ movies, genres, countries }: MovieTableProps) {
                   >
                     <Info className="h-4 w-4" />
                   </Button>
+                  <div className="flex justify-center gap-2 mt-2">
+                    <Button
+                        variant={teste.filter((item: any) => item.id === movie.id && !item.isDubbed).length > 0 ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handleDubbedChange(movie.id, false)}
+                    >
+                      LEG
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -293,6 +328,7 @@ export function MovieTable({ movies, genres, countries }: MovieTableProps) {
                 src={`${TMDB_IMG_URL}${selectedMovie.poster_path}`}
                 alt={selectedMovie.title}
                 width={200}
+                height={200}
                 className="w-[200px] mx-auto rounded-lg"
               />
             )}
