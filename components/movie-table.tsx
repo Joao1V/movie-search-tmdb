@@ -25,6 +25,7 @@ import "moment/locale/pt-br";
 import {getStorage, setStorage} from "@/utils/storage";
 import Image from "next/image";
 import {usePathname} from "next/navigation";
+import {STORAGE_MOVIES_DONE} from "@/components/theme-provider";
 
 moment.locale("pt-br");
 
@@ -64,7 +65,6 @@ interface MovieTableProps {
 }
 
 const TMDB_IMG_URL = "https://image.tmdb.org/t/p/w185";
-export const STORAGE_MOVIES_DONE = window.location.pathname === "/p2p" ? "movies_p2p" : "movies_1"
 
 export function MovieTable({ movies, genres, countries }: MovieTableProps) {
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);

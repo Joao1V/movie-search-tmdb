@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import {getStorage} from "@/utils/storage";
-import {MovieStorage, STORAGE_MOVIES_DONE} from "@/components/movie-table";
+import {MovieStorage} from "@/components/movie-table";
+import {STORAGE_MOVIES_DONE} from "@/components/theme-provider";
 
 interface MovieStats {
   today: number;

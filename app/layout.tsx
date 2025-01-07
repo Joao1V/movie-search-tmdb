@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   description: "Busca e acompanhamento de filmes",
 };
 
+
 export default function RootLayout({
   children,
 }: {
