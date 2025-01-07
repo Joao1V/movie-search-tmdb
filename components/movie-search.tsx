@@ -15,6 +15,7 @@ import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/
 import Image from "next/image";
 import {Badge} from "@/components/ui/badge";
 import moment from "moment-timezone";
+import {usePathname} from "next/navigation";
 
 const TMDB_API_KEY = "84bef04731b60d2f1bd0f851679b2ec5";
 const TMDB_API_URL = "https://api.themoviedb.org/3";
@@ -28,7 +29,7 @@ export function MovieSearch() {
   const { theme, setTheme } = useTheme();
   const inputRef = useRef<HTMLInputElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-
+  const pathname = usePathname();
   const fetchGenres = async () => {
     try {
       const response = await axios.get(
@@ -121,6 +122,9 @@ export function MovieSearch() {
               <div className="flex items-center space-x-2">
                 <Film className="h-8 w-8"/>
                 <h1 className="text-3xl font-bold">Busca de Filmes</h1>
+                <div>
+                  <Badge>P2P</Badge>
+                </div>
               </div>
               <div className={"flex items-center"}>
                 <Button
