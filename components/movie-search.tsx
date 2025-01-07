@@ -122,9 +122,11 @@ export function MovieSearch() {
               <div className="flex items-center space-x-2">
                 <Film className="h-8 w-8"/>
                 <h1 className="text-3xl font-bold">Busca de Filmes</h1>
-                <div>
-                  <Badge>P2P</Badge>
-                </div>
+                {pathname === "/p2p" &&
+                    <div>
+                      <Badge>P2P</Badge>
+                    </div>
+                }
               </div>
               <div className={"flex items-center"}>
                 <Button
