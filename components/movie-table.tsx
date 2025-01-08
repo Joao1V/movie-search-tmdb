@@ -241,6 +241,7 @@ export function MovieTable({ movies, genres, countries }: MovieTableProps) {
                     />
                     <div>
                       <p className="font-medium text-lg max-w-[200px] mb-4">{movie.title}</p>
+                      <p className={'font-sans  mb-5'}>ID: {movie.id}</p>
                       <p className="max-w-[300px] line-clamp-4 mb-4">{movie.overview}</p>
                     </div>
                   </div>
