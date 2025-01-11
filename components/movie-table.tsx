@@ -62,11 +62,12 @@ interface MovieTableProps {
   movies: Movie[];
   genres: { [key: number]: string };
   countries: Country[];
+  onSearch: (e:string | number) => void | any
 }
 
 const TMDB_IMG_URL = "https://image.tmdb.org/t/p/w185";
 
-export function MovieTable({ movies, genres, countries }: MovieTableProps) {
+export function MovieTable({ movies, genres, countries, onSearch }: MovieTableProps) {
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [checkedMovies, setCheckedMovies] = useState<{ [key: number]: boolean }>(
     {}
@@ -241,7 +242,7 @@ export function MovieTable({ movies, genres, countries }: MovieTableProps) {
                     />
                     <div>
                       <p className="font-medium text-lg max-w-[200px] mb-4">{movie.title}</p>
-                      <p className={'font-sans  mb-5'}>ID: {movie.id}</p>
+                      <p className={'font-sans  mb-5 cursor-pointer hover:text-pink-700 transition'} onClick={() => onSearch(`${movie.id}`)}>ID: {movie.id}</p>
                       <p className="max-w-[300px] line-clamp-4 mb-4">{movie.overview}</p>
                     </div>
                   </div>

@@ -47,8 +47,8 @@ export function MovieSearch() {
     }
   };
 
-  const searchMovies = async () => {
-    const query = inputRef.current?.value || "";
+  const searchMovies = async (e?:string) => {
+    const query = e || inputRef.current?.value || "";
     const isNumeric = /^\d+$/.test(query);
 
     if (!query.trim()) {
@@ -209,7 +209,9 @@ export function MovieSearch() {
               className={"container mx-auto pb-10"}
           >
             {movies?.length > 0 && <div className={"mb-4"}><span>{movies.length} resultados</span></div>}
-            <MovieTable movies={movies} countries={countries} genres={genres}/>
+            <MovieTable movies={movies} countries={countries} genres={genres} onSearch={(e: string) => {
+              searchMovies(e)
+            }}/>
           </motion.div>
         </AnimatePresence>
       </div>
