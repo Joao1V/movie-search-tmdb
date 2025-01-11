@@ -62,7 +62,7 @@ interface MovieTableProps {
   movies: Movie[];
   genres: { [key: number]: string };
   countries: Country[];
-  onSearch: (e:string | number) => void | any
+  onSearch: (e:string) => void | any
 }
 
 const TMDB_IMG_URL = "https://image.tmdb.org/t/p/w185";
